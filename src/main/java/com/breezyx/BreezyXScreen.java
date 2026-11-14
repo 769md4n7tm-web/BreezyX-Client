@@ -3,6 +3,7 @@ package com.breezyx;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ public class BreezyXScreen extends Screen {
     private static final int MUTED = 0xFF8796A8;
 
     private String selectedTab = "Render";
-
     private final List<Module> modules = new ArrayList<>();
 
     public BreezyXScreen() {
@@ -49,8 +49,6 @@ public class BreezyXScreen extends Screen {
 
         graphics.fill(left, top, left + 520, top + 330, PANEL);
         graphics.fill(left, top, left + 520, top + 2, CYAN);
-
-        // Sidebar
         graphics.fill(left, top, left + 125, top + 330, 0xFF101925);
 
         graphics.drawString(font, "BREEZY", left + 17, top + 20, CYAN);
@@ -65,17 +63,8 @@ public class BreezyXScreen extends Screen {
             int y = top + 75 + i * 32;
 
             if (selectedTab.equals(tabs[i])) {
-                graphics.fill(
-                        left + 8, y - 5,
-                        left + 117, y + 20,
-                        0xFF203746
-                );
-
-                graphics.fill(
-                        left + 8, y - 5,
-                        left + 11, y + 20,
-                        CYAN
-                );
+                graphics.fill(left + 8, y - 5, left + 117, y + 20, 0xFF203746);
+                graphics.fill(left + 8, y - 5, left + 11, y + 20, CYAN);
             }
 
             graphics.drawString(
@@ -87,42 +76,28 @@ public class BreezyXScreen extends Screen {
             );
         }
 
-        // Main content
         graphics.drawString(
-                font,
-                selectedTab.toUpperCase(),
-                left + 150,
-                top + 25,
-                WHITE
+                font, selectedTab.toUpperCase(),
+                left + 150, top + 25, WHITE
         );
 
         graphics.drawString(
-                font,
-                "Breezy X / Client Interface",
-                left + 150,
-                top + 43,
-                MUTED
+                font, "Breezy X / Client Interface",
+                left + 150, top + 43, MUTED
         );
 
         if (selectedTab.equals("Render")) {
             drawModules(graphics, left, top);
         } else {
             graphics.drawString(
-                    font,
-                    "Coming soon...",
-                    left + 150,
-                    top + 100,
-                    MUTED
+                    font, "Coming soon...",
+                    left + 150, top + 100, MUTED
             );
         }
 
-        // Footer
         graphics.drawString(
-                font,
-                "BREEZY X | 1.0.0",
-                left + 150,
-                top + 305,
-                CYAN
+                font, "BREEZY X | 1.0.0",
+                left + 150, top + 305, CYAN
         );
 
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -139,27 +114,16 @@ public class BreezyXScreen extends Screen {
             int x = left + 150 + (i % 2) * 175;
             int y = top + 75 + (i / 2) * 65;
 
-            graphics.fill(
-                    x, y,
-                    x + 160, y + 52,
-                    0xFF172331
-            );
+            graphics.fill(x, y, x + 160, y + 52, 0xFF172331);
 
             graphics.drawString(
-                    font,
-                    module.name,
-                    x + 12,
-                    y + 12,
-                    WHITE
+                    font, module.name,
+                    x + 12, y + 12, WHITE
             );
 
             int color = module.enabled ? CYAN : 0xFF566273;
 
-            graphics.fill(
-                    x + 118, y + 32,
-                    x + 148, y + 36,
-                    color
-            );
+            graphics.fill(x + 118, y + 32, x + 148, y + 36, color);
 
             graphics.fill(
                     module.enabled ? x + 138 : x + 118,
@@ -172,8 +136,7 @@ public class BreezyXScreen extends Screen {
             graphics.drawString(
                     font,
                     module.enabled ? "ON" : "OFF",
-                    x + 12,
-                    y + 34,
+                    x + 12, y + 34,
                     module.enabled ? CYAN : MUTED
             );
         }
@@ -181,13 +144,15 @@ public class BreezyXScreen extends Screen {
 
     @Override
     public boolean mouseClicked(
-            double mouseX,
-            double mouseY,
-            int button
+            MouseButtonEvent event,
+            boolean doubleClick
     ) {
-        if (button != 0) {
-            return super.mouseClicked(mouseX, mouseY, button);
+        if (event.button() != 0) {
+            return super.mouseClicked(event, doubleClick);
         }
+
+        double mouseX = event.x();
+        double mouseY = event.y();
 
         int left = width / 2 - 260;
         int top = height / 2 - 165;
@@ -214,14 +179,13 @@ public class BreezyXScreen extends Screen {
 
                 if (mouseX >= x && mouseX <= x + 160
                         && mouseY >= y && mouseY <= y + 52) {
-                    modules.get(i).enabled =
-                            !modules.get(i).enabled;
+                    modules.get(i).enabled = !modules.get(i).enabled;
                     return true;
                 }
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private static class Module {
