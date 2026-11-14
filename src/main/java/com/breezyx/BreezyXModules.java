@@ -44,6 +44,7 @@ public class BreezyXModules {
 
         int y = 8;
 
+        // FPS Counter
         if (fpsCounter) {
             graphics.drawString(
                     minecraft.font,
@@ -53,6 +54,7 @@ public class BreezyXModules {
             y += 12;
         }
 
+        // Coordinates HUD
         if (coordinatesHud) {
             String coords = String.format(
                     Locale.ROOT,
@@ -69,6 +71,7 @@ public class BreezyXModules {
             );
         }
 
+        // Armor Display
         if (armorDisplay) {
             int x = minecraft.getWindow().getGuiScaledWidth() - 80;
             int armorY = 8;
