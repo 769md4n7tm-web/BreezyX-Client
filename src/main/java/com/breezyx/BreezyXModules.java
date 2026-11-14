@@ -4,8 +4,11 @@ package com.breezyx;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Locale;
 
 public class BreezyXModules {
 
@@ -30,10 +33,8 @@ public class BreezyXModules {
         }
     }
 
-    public static void renderHud(
-            GuiGraphics graphics,
-            DeltaTracker tickCounter
-    ) {
+    public static void renderHud(GuiGraphics graphics, DeltaTracker tickCounter) {
+
         Minecraft minecraft = Minecraft.getInstance();
         Player player = minecraft.player;
 
@@ -54,7 +55,7 @@ public class BreezyXModules {
 
         if (coordinatesHud) {
             String coords = String.format(
-                    java.util.Locale.ROOT,
+                    Locale.ROOT,
                     "XYZ: %.1f / %.1f / %.1f",
                     player.getX(),
                     player.getY(),
@@ -80,15 +81,18 @@ public class BreezyXModules {
 
             armorY += 12;
 
-            for (ItemStack stack : player.getInventory().armor) {
+            EquipmentSlot[] slots = {
+                    EquipmentSlot.FEET,
+                    EquipmentSlot.LEGS,
+                    EquipmentSlot.CHEST,
+                    EquipmentSlot.HEAD
+            };
+
+            for (EquipmentSlot slot : slots) {
+                ItemStack stack = player.getItemBySlot(slot);
+
                 if (!stack.isEmpty()) {
                     graphics.renderItem(stack, x, armorY);
-                    graphics.drawString(
-                            minecraft.font,
-                            String.valueOf(stack.getCount()),
-                            x + 17, armorY + 9,
-                            0xFFFFFFFF
-                    );
                 }
 
                 x += 18;
