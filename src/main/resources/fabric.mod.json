@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "breezyx",
+  "version": "${version}",
+  "name": "Breezy X",
+  "description": "Breezy X client-side Minecraft interface",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.breezyx.BreezyXClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
