@@ -1,4 +1,11 @@
+
 package com.breezyx;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class BreezyXModules {
 
@@ -20,6 +27,72 @@ public class BreezyXModules {
             case "FPS Counter" -> fpsCounter = enabled;
             case "Coordinates HUD" -> coordinatesHud = enabled;
             case "Armor Display" -> armorDisplay = enabled;
+        }
+    }
+
+    public static void renderHud(
+            GuiGraphics graphics,
+            DeltaTracker tickCounter
+    ) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Player player = minecraft.player;
+
+        if (player == null || minecraft.options.hideGui) {
+            return;
+        }
+
+        int y = 8;
+
+        if (fpsCounter) {
+            graphics.drawString(
+                    minecraft.font,
+                    "FPS: " + minecraft.getFps(),
+                    8, y, 0xFF35D9FF
+            );
+            y += 12;
+        }
+
+        if (coordinatesHud) {
+            String coords = String.format(
+                    java.util.Locale.ROOT,
+                    "XYZ: %.1f / %.1f / %.1f",
+                    player.getX(),
+                    player.getY(),
+                    player.getZ()
+            );
+
+            graphics.drawString(
+                    minecraft.font,
+                    coords,
+                    8, y, 0xFFFFFFFF
+            );
+        }
+
+        if (armorDisplay) {
+            int x = minecraft.getWindow().getGuiScaledWidth() - 80;
+            int armorY = 8;
+
+            graphics.drawString(
+                    minecraft.font,
+                    "ARMOR",
+                    x, armorY, 0xFF35D9FF
+            );
+
+            armorY += 12;
+
+            for (ItemStack stack : player.getInventory().armor) {
+                if (!stack.isEmpty()) {
+                    graphics.renderItem(stack, x, armorY);
+                    graphics.drawString(
+                            minecraft.font,
+                            String.valueOf(stack.getCount()),
+                            x + 17, armorY + 9,
+                            0xFFFFFFFF
+                    );
+                }
+
+                x += 18;
+            }
         }
     }
 }
