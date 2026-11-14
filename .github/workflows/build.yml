@@ -1,3 +1,4 @@
+
 name: Build Breezy X
 
 on:
@@ -20,5 +21,16 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Build mod
-        run: echo "Breezy X build environment ready"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.0'
+
+      - name: Build Breezy X
+        run: gradle build
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Breezy-X
+          path: build/libs/*.jar
