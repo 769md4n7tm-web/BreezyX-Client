@@ -49,6 +49,10 @@ public class BreezyXScreen extends Screen {
 
         modules.add(new Module("Menu Animation", "Settings"));
         modules.add(new Module("Interface Effects", "Settings"));
+
+        for (Module module : modules) {
+            module.enabled = BreezyXModules.isEnabled(module.name);
+        }
     }
 
     @Override
@@ -104,67 +108,35 @@ public class BreezyXScreen extends Screen {
 
         float open = animation();
 
-        graphics.fill(
-                0, 0, width, height,
-                alpha(0x99000000, open)
-        );
+        graphics.fill(0, 0, width, height,
+                alpha(0x99000000, open));
 
-        // Main panel
-        roundRect(
-                graphics, x, y, WIDTH, HEIGHT,
-                alpha(0xF0101722, open)
-        );
+        roundRect(graphics, x, y, WIDTH, HEIGHT,
+                alpha(0xF0101722, open));
 
-        // Cyan accent
-        graphics.fill(
-                x + 12, y,
-                x + WIDTH - 12, y + 2,
-                alpha(CYAN, open)
-        );
+        graphics.fill(x + 12, y, x + WIDTH - 12, y + 2,
+                alpha(CYAN, open));
 
-        // Header
-        graphics.fill(
-                x + 1, y + 1,
-                x + WIDTH - 1, y + 39,
-                alpha(0xFF131D29, open)
-        );
+        graphics.fill(x + 1, y + 1, x + WIDTH - 1, y + 39,
+                alpha(0xFF131D29, open));
 
-        graphics.drawString(
-                font, "BREEZY", x + 13, y + 12,
-                alpha(WHITE, open)
-        );
+        graphics.drawString(font, "BREEZY", x + 13, y + 12,
+                alpha(WHITE, open));
+        graphics.drawString(font, "X", x + 56, y + 12,
+                alpha(CYAN, open));
+        graphics.drawString(font, "CLIENT", x + 75, y + 14,
+                alpha(MUTED, open));
+        graphics.drawString(font, "1.0", x + WIDTH - 35, y + 14,
+                alpha(CYAN, open));
 
-        graphics.drawString(
-                font, "X", x + 56, y + 12,
-                alpha(CYAN, open)
-        );
+        graphics.fill(x + 1, y + 39, x + 103, y + HEIGHT - 1,
+                alpha(0xFF121B27, open));
 
-        graphics.drawString(
-                font, "CLIENT", x + 75, y + 14,
-                alpha(MUTED, open)
-        );
+        graphics.drawString(font, "MENU", x + 13, y + 49,
+                alpha(MUTED, open));
 
-        graphics.drawString(
-                font, "1.0", x + WIDTH - 35, y + 14,
-                alpha(CYAN, open)
-        );
-
-        // Sidebar
-        graphics.fill(
-                x + 1, y + 39,
-                x + 103, y + HEIGHT - 1,
-                alpha(0xFF121B27, open)
-        );
-
-        graphics.drawString(
-                font, "MENU", x + 13, y + 49,
-                alpha(MUTED, open)
-        );
-
-        // Tabs
         for (int i = 0; i < tabs.length; i++) {
             int tabY = y + 67 + i * 25;
-
             boolean selected = selectedTab.equals(tabs[i]);
 
             boolean hovered =
@@ -175,77 +147,46 @@ public class BreezyXScreen extends Screen {
                     ? 0xFF203747
                     : hovered ? 0xFF1C2937 : 0xFF121B27;
 
-            roundRect(
-                    graphics,
-                    x + 7, tabY - 3,
-                    89, 21,
-                    alpha(background, open)
-            );
+            roundRect(graphics, x + 7, tabY - 3, 89, 21,
+                    alpha(background, open));
 
             if (selected) {
-                graphics.fill(
-                        x + 7, tabY - 2,
-                        x + 9, tabY + 17,
-                        alpha(CYAN, open)
-                );
+                graphics.fill(x + 7, tabY - 2, x + 9, tabY + 17,
+                        alpha(CYAN, open));
             }
 
-            graphics.drawString(
-                    font, tabs[i],
-                    x + 17, tabY + 3,
-                    alpha(selected ? CYAN : WHITE, open)
-            );
+            graphics.drawString(font, tabs[i], x + 17, tabY + 3,
+                    alpha(selected ? CYAN : WHITE, open));
         }
 
-        // Content title
         int contentX = x + 116;
 
-        graphics.drawString(
-                font, selectedTab.toUpperCase(),
-                contentX, y + 49,
-                alpha(WHITE, open)
-        );
+        graphics.drawString(font, selectedTab.toUpperCase(),
+                contentX, y + 49, alpha(WHITE, open));
 
-        graphics.drawString(
-                font, "Breezy X Modules",
-                contentX, y + 63,
-                alpha(MUTED, open)
-        );
+        graphics.drawString(font, "Breezy X Modules",
+                contentX, y + 63, alpha(MUTED, open));
 
-        graphics.fill(
-                contentX, y + 81,
-                x + WIDTH - 13, y + 82,
-                alpha(0xFF293746, open)
-        );
+        graphics.fill(contentX, y + 81, x + WIDTH - 13, y + 82,
+                alpha(0xFF293746, open));
 
         if (selectedTab.equals("Combat")) {
-            graphics.drawString(
-                    font, "No modules configured.",
-                    contentX, y + 103,
-                    alpha(MUTED, open)
-            );
+            graphics.drawString(font, "No modules configured.",
+                    contentX, y + 103, alpha(MUTED, open));
         } else {
             drawModules(graphics, mouseX, mouseY, x, y, open);
         }
 
-        // Footer
-        graphics.fill(
-                x + 103, y + HEIGHT - 23,
+        graphics.fill(x + 103, y + HEIGHT - 23,
                 x + WIDTH - 1, y + HEIGHT - 22,
-                alpha(0xFF293746, open)
-        );
+                alpha(0xFF293746, open));
 
-        graphics.drawString(
-                font, "BREEZY X",
-                contentX, y + HEIGHT - 15,
-                alpha(CYAN, open)
-        );
+        graphics.drawString(font, "BREEZY X",
+                contentX, y + HEIGHT - 15, alpha(CYAN, open));
 
-        graphics.drawString(
-                font, "1.0.0",
+        graphics.drawString(font, "1.0.0",
                 x + WIDTH - 42, y + HEIGHT - 15,
-                alpha(MUTED, open)
-        );
+                alpha(MUTED, open));
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
@@ -261,9 +202,7 @@ public class BreezyXScreen extends Screen {
         int index = 0;
 
         for (Module module : modules) {
-            if (!module.category.equals(selectedTab)) {
-                continue;
-            }
+            if (!module.category.equals(selectedTab)) continue;
 
             int column = index % 2;
             int row = index / 2;
@@ -281,62 +220,39 @@ public class BreezyXScreen extends Screen {
             float toggleTarget = module.enabled ? 1.0F : 0.0F;
             module.toggle += (toggleTarget - module.toggle) * 0.22F;
 
-            int background = mix(
-                    0xFF192533,
-                    0xFF294354,
-                    module.hover
-            );
+            int background = mix(0xFF192533, 0xFF294354,
+                    module.hover);
 
-            roundRect(
-                    graphics, cardX, cardY,
-                    112, 33,
-                    alpha(background, open)
-            );
+            roundRect(graphics, cardX, cardY, 112, 33,
+                    alpha(background, open));
 
-            graphics.drawString(
-                    font, module.name,
-                    cardX + 7, cardY + 5,
-                    alpha(WHITE, open)
-            );
+            graphics.drawString(font, module.name,
+                    cardX + 7, cardY + 5, alpha(WHITE, open));
 
-            graphics.drawString(
-                    font,
+            graphics.drawString(font,
                     module.enabled ? "ON" : "OFF",
                     cardX + 7, cardY + 19,
-                    alpha(module.enabled ? CYAN : MUTED, open)
-            );
+                    alpha(module.enabled ? CYAN : MUTED, open));
 
-            // Animated toggle
             int toggleX = cardX + 89;
             int toggleY = cardY + 12;
 
-            graphics.fill(
-                    toggleX, toggleY,
-                    toggleX + 16, toggleY + 9,
-                    alpha(
-                            mix(0xFF465363, CYAN, module.toggle),
-                            open
-                    )
-            );
+            graphics.fill(toggleX, toggleY, toggleX + 16,
+                    toggleY + 9,
+                    alpha(mix(0xFF465363, CYAN, module.toggle), open));
 
             int knobX = toggleX + 2 +
                     Math.round(module.toggle * 7);
 
-            graphics.fill(
-                    knobX, toggleY + 2,
-                    knobX + 5, toggleY + 7,
-                    alpha(WHITE, open)
-            );
+            graphics.fill(knobX, toggleY + 2,
+                    knobX + 5, toggleY + 7, alpha(WHITE, open));
 
             index++;
         }
 
         if (index == 0) {
-            graphics.drawString(
-                    font, "Nothing here yet.",
-                    x + 116, y + 104,
-                    alpha(MUTED, open)
-            );
+            graphics.drawString(font, "Nothing here yet.",
+                    x + 116, y + 104, alpha(MUTED, open));
         }
     }
 
@@ -367,7 +283,6 @@ public class BreezyXScreen extends Screen {
         int x = left();
         int y = top();
 
-        // Tab clicks
         for (int i = 0; i < tabs.length; i++) {
             int tabY = y + 67 + i * 25;
 
@@ -378,13 +293,10 @@ public class BreezyXScreen extends Screen {
             }
         }
 
-        // Module clicks
         int index = 0;
 
         for (Module module : modules) {
-            if (!module.category.equals(selectedTab)) {
-                continue;
-            }
+            if (!module.category.equals(selectedTab)) continue;
 
             int column = index % 2;
             int row = index / 2;
@@ -394,7 +306,14 @@ public class BreezyXScreen extends Screen {
 
             if (mouseX >= cardX && mouseX <= cardX + 112 &&
                     mouseY >= cardY && mouseY <= cardY + 33) {
+
                 module.enabled = !module.enabled;
+
+                BreezyXModules.setEnabled(
+                        module.name,
+                        module.enabled
+                );
+
                 return true;
             }
 
