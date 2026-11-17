@@ -11,19 +11,18 @@ import java.util.List;
 
 public class BreezyXScreen extends Screen {
 
-    private static final int CYAN = 0xFF35D9FF;
+    private static final int CYAN = 0xFF20D9FF;
     private static final int WHITE = 0xFFFFFFFF;
     private static final int MUTED = 0xFF8493A5;
-
-    private static final int WIDTH = 380;
-    private static final int HEIGHT = 240;
+    private static final int PANEL = 0xF014202E;
+    private static final int CARD = 0xFF1C2B3B;
 
     private String selectedTab = "Render";
     private long openedAt;
 
     private final String[] tabs = {
-            "Combat", "Render", "World",
-            "Player", "Client", "Settings"
+        "Combat", "Render", "World",
+        "Player", "Client"
     };
 
     private final List<Module> modules = new ArrayList<>();
@@ -31,24 +30,9 @@ public class BreezyXScreen extends Screen {
     public BreezyXScreen() {
         super(Component.literal("Breezy X"));
 
-        modules.add(new Module("Coordinates HUD", "Render"));
         modules.add(new Module("FPS Counter", "Render"));
-        modules.add(new Module("Light Debug", "Render"));
-        modules.add(new Module("Status Panel", "Render"));
+        modules.add(new Module("Coordinates HUD", "Render"));
         modules.add(new Module("Armor Display", "Render"));
-        modules.add(new Module("Clock HUD", "Render"));
-
-        modules.add(new Module("World Information", "World"));
-        modules.add(new Module("Time Display", "World"));
-
-        modules.add(new Module("Movement HUD", "Player"));
-        modules.add(new Module("Player Information", "Player"));
-
-        modules.add(new Module("Client Sounds", "Client"));
-        modules.add(new Module("Watermark", "Client"));
-
-        modules.add(new Module("Menu Animation", "Settings"));
-        modules.add(new Module("Interface Effects", "Settings"));
 
         for (Module module : modules) {
             module.enabled = BreezyXModules.isEnabled(module.name);
@@ -61,19 +45,20 @@ public class BreezyXScreen extends Screen {
         openedAt = System.currentTimeMillis();
     }
 
+    private int panelWidth() {
+        return Math.min(760, width - 24);
+    }
+
+    private int panelHeight() {
+        return Math.min(430, height - 24);
+    }
+
     private int left() {
-        return width / 2 - WIDTH / 2;
+        return (width - panelWidth()) / 2;
     }
 
     private int top() {
-        return height / 2 - HEIGHT / 2;
-    }
-
-    private float animation() {
-        return Math.min(
-                1.0F,
-                (System.currentTimeMillis() - openedAt) / 220.0F
-        );
+        return (height - panelHeight()) / 2;
     }
 
     private int alpha(int color, float amount) {
@@ -81,197 +66,202 @@ public class BreezyXScreen extends Screen {
         return (color & 0x00FFFFFF) | (a << 24);
     }
 
-    private int mix(int first, int second, float amount) {
-        amount = Math.max(0, Math.min(1, amount));
+    private float animation() {
+        return Math.min(1.0F,
+            (System.currentTimeMillis() - openedAt) / 220.0F);
+    }
 
-        int a = (int) (((first >> 24) & 255) *
-                (1 - amount) + ((second >> 24) & 255) * amount);
-        int r = (int) (((first >> 16) & 255) *
-                (1 - amount) + ((second >> 16) & 255) * amount);
-        int g = (int) (((first >> 8) & 255) *
-                (1 - amount) + ((second >> 8) & 255) * amount);
-        int b = (int) ((first & 255) *
-                (1 - amount) + (second & 255) * amount);
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
+    private void panel(GuiGraphics g, int x, int y, int w, int h) {
+        g.fill(x, y, x + w, y + h, PANEL);
+        g.fill(x, y, x + w, y + 2, CYAN);
+        g.fill(x, y + h - 2, x + w, y + h, 0xFF174B63);
+        g.fill(x, y, x + 2, y + h, 0xFF174B63);
+        g.fill(x + w - 2, y, x + w, y + h, 0xFF174B63);
     }
 
     @Override
     public void render(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            float partialTick
+        GuiGraphics g,
+        int mouseX,
+        int mouseY,
+        float partialTick
     ) {
+        float fade = animation();
+
         int x = left();
         int y = top();
+        int w = panelWidth();
+        int h = panelHeight();
 
-        float open = animation();
+        g.fill(0, 0, width, height, alpha(0x99000000, fade));
 
-        graphics.fill(0, 0, width, height,
-                alpha(0x99000000, open));
+        // Main window
+        g.fill(x, y, x + w, y + h, alpha(0xFF0D1724, fade));
 
-        roundRect(graphics, x, y, WIDTH, HEIGHT,
-                alpha(0xF0101722, open));
+        // Header
+        g.fill(x, y, x + w, y + 58, alpha(0xFF111F2E, fade));
+        g.fill(x, y, x + w, y + 2, alpha(CYAN, fade));
 
-        graphics.fill(x + 12, y, x + WIDTH - 12, y + 2,
-                alpha(CYAN, open));
+        g.drawString(font, "BREEZY", x + 22, y + 19,
+            alpha(WHITE, fade));
+        g.drawString(font, "X", x + 67, y + 19,
+            alpha(CYAN, fade));
+        g.drawString(font, "CLIENT", x + 100, y + 20,
+            alpha(MUTED, fade));
 
-        graphics.fill(x + 1, y + 1, x + WIDTH - 1, y + 39,
-                alpha(0xFF131D29, open));
+        g.drawString(font, "1.0.0",
+            x + w - 55, y + 20, alpha(CYAN, fade));
 
-        graphics.drawString(font, "BREEZY", x + 13, y + 12,
-                alpha(WHITE, open));
-        graphics.drawString(font, "X", x + 56, y + 12,
-                alpha(CYAN, open));
-        graphics.drawString(font, "CLIENT", x + 75, y + 14,
-                alpha(MUTED, open));
-        graphics.drawString(font, "1.0", x + WIDTH - 35, y + 14,
-                alpha(CYAN, open));
+        // Sidebar
+        g.fill(x, y + 58, x + 145, y + h,
+            alpha(0xFF101B29, fade));
 
-        graphics.fill(x + 1, y + 39, x + 103, y + HEIGHT - 1,
-                alpha(0xFF121B27, open));
-
-        graphics.drawString(font, "MENU", x + 13, y + 49,
-                alpha(MUTED, open));
+        g.drawString(font, "NAVIGATION",
+            x + 14, y + 77, alpha(MUTED, fade));
 
         for (int i = 0; i < tabs.length; i++) {
-            int tabY = y + 67 + i * 25;
+            int tabY = y + 105 + i * 38;
             boolean selected = selectedTab.equals(tabs[i]);
 
-            boolean hovered =
-                    mouseX >= x + 7 && mouseX <= x + 96 &&
-                    mouseY >= tabY - 3 && mouseY <= tabY + 17;
-
-            int background = selected
-                    ? 0xFF203747
-                    : hovered ? 0xFF1C2937 : 0xFF121B27;
-
-            roundRect(graphics, x + 7, tabY - 3, 89, 21,
-                    alpha(background, open));
-
             if (selected) {
-                graphics.fill(x + 7, tabY - 2, x + 9, tabY + 17,
-                        alpha(CYAN, open));
+                g.fill(x + 7, tabY - 5, x + 137, tabY + 23,
+                    alpha(0xFF203747, fade));
+                g.fill(x + 7, tabY - 5, x + 10, tabY + 23,
+                    alpha(CYAN, fade));
             }
 
-            graphics.drawString(font, tabs[i], x + 17, tabY + 3,
-                    alpha(selected ? CYAN : WHITE, open));
+            g.drawString(font, tabs[i],
+                x + 20, tabY + 4,
+                alpha(selected ? CYAN : WHITE, fade));
         }
 
-        int contentX = x + 116;
+        // Main content
+        int contentX = x + 165;
+        int contentY = y + 77;
 
-        graphics.drawString(font, selectedTab.toUpperCase(),
-                contentX, y + 49, alpha(WHITE, open));
+        g.drawString(font, selectedTab.toUpperCase(),
+            contentX, contentY, alpha(WHITE, fade));
 
-        graphics.drawString(font, "Breezy X Modules",
-                contentX, y + 63, alpha(MUTED, open));
+        g.drawString(font, "Breezy X Client Interface",
+            contentX, contentY + 19, alpha(MUTED, fade));
 
-        graphics.fill(contentX, y + 81, x + WIDTH - 13, y + 82,
-                alpha(0xFF293746, open));
+        g.fill(contentX, contentY + 40,
+            x + w - 18, contentY + 41,
+            alpha(0xFF344456, fade));
 
-        if (selectedTab.equals("Combat")) {
-            graphics.drawString(font, "No modules configured.",
-                    contentX, y + 103, alpha(MUTED, open));
+        if (selectedTab.equals("Render")) {
+            drawRenderCards(g, contentX, contentY + 60, fade);
         } else {
-            drawModules(graphics, mouseX, mouseY, x, y, open);
+            panel(g, contentX, contentY + 60,
+                Math.max(100, w - 185), 90);
+
+            g.drawString(font, "No modules available",
+                contentX + 15, contentY + 82,
+                alpha(MUTED, fade));
         }
 
-        graphics.fill(x + 103, y + HEIGHT - 23,
-                x + WIDTH - 1, y + HEIGHT - 22,
-                alpha(0xFF293746, open));
+        // Active panel
+        int activeX = x + w - 170;
+        int activeY = y + 58;
 
-        graphics.drawString(font, "BREEZY X",
-                contentX, y + HEIGHT - 15, alpha(CYAN, open));
+        panel(g, activeX, activeY, 155, 105);
 
-        graphics.drawString(font, "1.0.0",
-                x + WIDTH - 42, y + HEIGHT - 15,
-                alpha(MUTED, open));
+        g.drawString(font, "ACTIVE",
+            activeX + 12, activeY + 13, alpha(CYAN, fade));
 
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
+        int activeCount = 0;
+        for (Module module : modules) {
+            if (module.enabled) activeCount++;
+        }
 
-    private void drawModules(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            int x,
-            int y,
-            float open
-    ) {
-        int index = 0;
+        g.drawString(font,
+            activeCount == 0
+                ? "Nothing is switched on"
+                : activeCount + " modules enabled",
+            activeX + 12, activeY + 38,
+            alpha(WHITE, fade));
+
+        int activeYText = activeY + 58;
 
         for (Module module : modules) {
-            if (!module.category.equals(selectedTab)) continue;
-
-            int column = index % 2;
-            int row = index / 2;
-
-            int cardX = x + 116 + column * 122;
-            int cardY = y + 94 + row * 39;
-
-            boolean hovered =
-                    mouseX >= cardX && mouseX <= cardX + 112 &&
-                    mouseY >= cardY && mouseY <= cardY + 33;
-
-            float target = hovered ? 1.0F : 0.0F;
-            module.hover += (target - module.hover) * 0.22F;
-
-            float toggleTarget = module.enabled ? 1.0F : 0.0F;
-            module.toggle += (toggleTarget - module.toggle) * 0.22F;
-
-            int background = mix(0xFF192533, 0xFF294354,
-                    module.hover);
-
-            roundRect(graphics, cardX, cardY, 112, 33,
-                    alpha(background, open));
-
-            graphics.drawString(font, module.name,
-                    cardX + 7, cardY + 5, alpha(WHITE, open));
-
-            graphics.drawString(font,
-                    module.enabled ? "ON" : "OFF",
-                    cardX + 7, cardY + 19,
-                    alpha(module.enabled ? CYAN : MUTED, open));
-
-            int toggleX = cardX + 89;
-            int toggleY = cardY + 12;
-
-            graphics.fill(toggleX, toggleY, toggleX + 16,
-                    toggleY + 9,
-                    alpha(mix(0xFF465363, CYAN, module.toggle), open));
-
-            int knobX = toggleX + 2 +
-                    Math.round(module.toggle * 7);
-
-            graphics.fill(knobX, toggleY + 2,
-                    knobX + 5, toggleY + 7, alpha(WHITE, open));
-
-            index++;
+            if (module.enabled) {
+                g.drawString(font, module.name,
+                    activeX + 12, activeYText,
+                    alpha(CYAN, fade));
+                activeYText += 12;
+            }
         }
 
-        if (index == 0) {
-            graphics.drawString(font, "Nothing here yet.",
-                    x + 116, y + 104, alpha(MUTED, open));
-        }
+        // Footer
+        g.fill(x + 145, y + h - 28,
+            x + w, y + h - 27, alpha(0xFF344456, fade));
+
+        g.drawString(font, "BREEZY X",
+            x + 165, y + h - 17, alpha(CYAN, fade));
+
+        g.drawString(font, "Fabric Client",
+            x + w - 100, y + h - 17, alpha(MUTED, fade));
+
+        super.render(g, mouseX, mouseY, partialTick);
     }
 
-    private void roundRect(
-            GuiGraphics graphics,
-            int x,
-            int y,
-            int w,
-            int h,
-            int color
+    private void drawRenderCards(
+        GuiGraphics g,
+        int x,
+        int y,
+        float fade
     ) {
-        graphics.fill(x + 3, y, x + w - 3, y + h, color);
-        graphics.fill(x, y + 3, x + w, y + h - 3, color);
+        int cardWidth = 190;
+        int cardHeight = 58;
+        int gap = 15;
+
+        for (int i = 0; i < modules.size(); i++) {
+            Module module = modules.get(i);
+
+            int column = i % 2;
+            int row = i / 2;
+
+            int cardX = x + column * (cardWidth + gap);
+            int cardY = y + row * (cardHeight + gap);
+
+            g.fill(cardX, cardY,
+                cardX + cardWidth, cardY + cardHeight,
+                alpha(CARD, fade));
+
+            g.fill(cardX, cardY,
+                cardX + 2, cardY + cardHeight,
+                alpha(CYAN, fade));
+
+            g.drawString(font, module.name,
+                cardX + 12, cardY + 12,
+                alpha(WHITE, fade));
+
+            g.drawString(font,
+                module.enabled ? "ENABLED" : "DISABLED",
+                cardX + 12, cardY + 34,
+                alpha(module.enabled ? CYAN : MUTED, fade));
+
+            int toggleColor = module.enabled
+                ? CYAN : 0xFF526174;
+
+            g.fill(cardX + cardWidth - 32, cardY + 20,
+                cardX + cardWidth - 12, cardY + 38,
+                alpha(toggleColor, fade));
+
+            int knobX = module.enabled
+                ? cardX + cardWidth - 19
+                : cardX + cardWidth - 30;
+
+            g.fill(knobX, cardY + 23,
+                knobX + 9, cardY + 35,
+                alpha(WHITE, fade));
+        }
     }
 
     @Override
     public boolean mouseClicked(
-            MouseButtonEvent event,
-            boolean doubleClick
+        MouseButtonEvent event,
+        boolean doubleClick
     ) {
         if (event.button() != 0) {
             return super.mouseClicked(event, doubleClick);
@@ -283,41 +273,48 @@ public class BreezyXScreen extends Screen {
         int x = left();
         int y = top();
 
+        // Navigation
         for (int i = 0; i < tabs.length; i++) {
-            int tabY = y + 67 + i * 25;
+            int tabY = y + 105 + i * 38;
 
-            if (mouseX >= x + 7 && mouseX <= x + 96 &&
-                    mouseY >= tabY - 3 && mouseY <= tabY + 17) {
+            if (mouseX >= x + 7 && mouseX <= x + 137
+                && mouseY >= tabY - 5 && mouseY <= tabY + 23) {
                 selectedTab = tabs[i];
                 return true;
             }
         }
 
-        int index = 0;
+        // Render toggles
+        if (selectedTab.equals("Render")) {
+            int contentX = x + 165;
+            int contentY = y + 77 + 60;
 
-        for (Module module : modules) {
-            if (!module.category.equals(selectedTab)) continue;
+            int cardWidth = 190;
+            int cardHeight = 58;
+            int gap = 15;
 
-            int column = index % 2;
-            int row = index / 2;
+            for (int i = 0; i < modules.size(); i++) {
+                Module module = modules.get(i);
 
-            int cardX = x + 116 + column * 122;
-            int cardY = y + 94 + row * 39;
+                int column = i % 2;
+                int row = i / 2;
 
-            if (mouseX >= cardX && mouseX <= cardX + 112 &&
-                    mouseY >= cardY && mouseY <= cardY + 33) {
+                int cardX = contentX + column * (cardWidth + gap);
+                int cardY = contentY + row * (cardHeight + gap);
 
-                module.enabled = !module.enabled;
+                if (mouseX >= cardX && mouseX <= cardX + cardWidth
+                    && mouseY >= cardY && mouseY <= cardY + cardHeight) {
 
-                BreezyXModules.setEnabled(
+                    module.enabled = !module.enabled;
+
+                    BreezyXModules.setEnabled(
                         module.name,
                         module.enabled
-                );
+                    );
 
-                return true;
+                    return true;
+                }
             }
-
-            index++;
         }
 
         return super.mouseClicked(event, doubleClick);
@@ -331,10 +328,7 @@ public class BreezyXScreen extends Screen {
     private static class Module {
         final String name;
         final String category;
-
         boolean enabled;
-        float hover;
-        float toggle;
 
         Module(String name, String category) {
             this.name = name;
